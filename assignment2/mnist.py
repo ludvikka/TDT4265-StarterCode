@@ -55,4 +55,12 @@ def load():
     dataset_path = SAVE_PATH.joinpath("mnist.pkl")
     with open(dataset_path, 'rb') as f:
         mnist = pickle.load(f)
+    mnist["training_images"]
+
+    mean = np.sum(mnist["training_images"])/(mnist["training_images"].shape[0]*mnist["training_images"].shape[1])
+    stdev =  np.std(mnist["training_images"])
+    print("Mean", mean, "stdev", stdev)
     return mnist["training_images"], mnist["training_labels"], mnist["test_images"], mnist["test_labels"]
+
+if __name__ == "__main__":
+    load()

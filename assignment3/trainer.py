@@ -5,6 +5,7 @@ import time
 import collections
 import utils
 import pathlib
+import numpy as np
 
 
 def compute_loss_and_accuracy(
@@ -23,6 +24,10 @@ def compute_loss_and_accuracy(
     """
     average_loss = 0
     accuracy = 0
+    counter = 0
+    sum_loss = 0
+
+    #sum = 0
     # TODO: Implement this function (Task  2a)
     with torch.no_grad():
         for (X_batch, Y_batch) in dataloader:
@@ -31,9 +36,18 @@ def compute_loss_and_accuracy(
             Y_batch = utils.to_cuda(Y_batch)
             # Forward pass the images through our model
             output_probs = model(X_batch)
-
+            loss = loss_criterion(output_probs,Y_batch)
+            sum_loss += loss
+            #loss = torch.nn.CrossEntropyLoss(output_probs,Y_batch) + loss
+            #print(loss.shape)
+            counter = counter + 1
+            max_outputs = np.argmax(output_probs,axis = 1) 
+            max_targets = np.argmax(Y_batch,axis = 1) 
+            sum = (outputs.shape[0] - np.count_nonzero(max_outputs - max_targets))/outputs.shape[0] + sum
+            
             # Compute Loss and Accuracy
-
+    accuracy = sum/counter
+    average_loss = loss/counter
     return average_loss, accuracy
 
 

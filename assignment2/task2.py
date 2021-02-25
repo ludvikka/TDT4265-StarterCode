@@ -16,10 +16,15 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: SoftmaxModel) 
         Accuracy (float)
     """
     # TODO: Implement this function (copy from last assignment)
-    accuracy = 0
+    outputs = model.forward(X)
+    max_outputs = np.argmax(outputs,axis = 1) 
+    max_targets = np.argmax(targets,axis = 1) 
+
+    sum = outputs.shape[0] - np.count_nonzero(max_outputs - max_targets)
+    accuracy = sum/outputs.shape[0]
     return accuracy
 
-
+    
 class SoftmaxTrainer(BaseTrainer):
 
     def __init__(
@@ -47,12 +52,25 @@ class SoftmaxTrainer(BaseTrainer):
             loss value (float) on batch
         """
         # TODO: Implement this function (task 2c)
-
         loss = 0
+        outputs = self.model.forward(X_batch)
+        self.model.backward(X_batch,outputs,Y_batch)
+        if (self.use_momentum):
+                    #FIX THIS
+            self.previous_grads[0] = self.model.grads[0] + self.momentum_gamma*self.previous_grads[0]
+            self.previous_grads[1] = self.model.grads[1] + self.momentum_gamma*self.previous_grads[1]
 
-        loss = cross_entropy_loss(Y_batch, logits)  # sol
+            self.model.ws[0] = self.model.ws[0]  - self.learning_rate*(self.previous_grads[0])
+            self.model.ws[1] = self.model.ws[1]  - self.learning_rate*(self.previous_grads[1])
 
+
+        else:
+            self.model.ws[0] = self.model.ws[0]  - self.model.grads[0]*self.learning_rate
+            self.model.ws[1] = self.model.ws[1]  - self.model.grads[1]*self.learning_rate
+
+        loss = cross_entropy_loss(Y_batch, outputs)
         return loss
+
 
     def validation_step(self):
         """
@@ -79,7 +97,7 @@ class SoftmaxTrainer(BaseTrainer):
 
 if __name__ == "__main__":
     # hyperparameters DO NOT CHANGE IF NOT SPECIFIED IN ASSIGNMENT TEXT
-    num_epochs = 50
+    num_epochs = 2
     learning_rate = .1
     batch_size = 32
     neurons_per_layer = [64, 10]
@@ -135,4 +153,4 @@ if __name__ == "__main__":
     plt.xlabel("Number of Training Steps")
     plt.ylabel("Accuracy")
     plt.legend()
-    plt.savefig("task2c_train_loss.png")
+    #plt.savefig("task2c_train_loss.png")

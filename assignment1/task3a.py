@@ -15,17 +15,18 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
     # TODO implement this function (Task 3a)
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    raise NotImplementedError
 
+    res = np.sum(-targets*np.log(outputs))/targets.shape[0]
+    return res
 
 class SoftmaxModel:
 
     def __init__(self, l2_reg_lambda: float):
         # Define number of input nodes
-        self.I = None
+        self.I = 785
 
         # Define number of output nodes
-        self.num_outputs = None
+        self.num_outputs = 10
         self.w = np.zeros((self.I, self.num_outputs))
         self.grad = None
 
@@ -39,7 +40,14 @@ class SoftmaxModel:
             y: output of model with shape [batch size, num_outputs]
         """
         # TODO implement this function (Task 3a)
-        return None
+        z = np.dot(X,self.w)
+        e_z = np.exp(z)
+        #e_z_r = np.dot(1/np.diag(np.sum(e_z,axis = 1)),e_z)
+        e_z_r = e_z/np.sum(e_z,axis = 1)[:, None]
+        return e_z_r
+      
+        
+
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
         """
@@ -59,6 +67,12 @@ class SoftmaxModel:
         assert self.grad.shape == self.w.shape,\
              f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
 
+        #self.grad = np.dot(-X.T,(targets-outputs))/X.shape[0]
+        #With L2 - reg
+        self.grad = np.dot(-X.T,(targets-outputs))/X.shape[0] + self.l2_reg_lambda*2*self.w
+        
+        #self.l2_reg_lambda
+
     def zero_grad(self) -> None:
         self.grad = None
 
@@ -71,6 +85,17 @@ def one_hot_encode(Y: np.ndarray, num_classes: int):
     Returns:
         Y: shape [Num examples, num classes]
     """
+    #My implementation
+    '''R = np.zeros((len(Y),num_classes))
+    np.zeros
+
+    for i in range(len(Y)):
+        R[i,Y[i]] = 1
+    '''
+    #stolen from the web for increased performance
+    targets = np.array(Y).reshape(-1)
+    R = np.eye(num_classes)[targets]
+    return R
     raise NotImplementedError
 
 

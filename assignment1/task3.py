@@ -17,7 +17,12 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: SoftmaxModel) 
         Accuracy (float)
     """
     # TODO: Implement this function (task 3c)
-    accuracy = 0
+    outputs = model.forward(X)
+    max_outputs = np.argmax(outputs,axis = 1) 
+    max_targets = np.argmax(targets,axis = 1) 
+
+    sum = outputs.shape[0] - np.count_nonzero(max_outputs - max_targets)
+    accuracy = sum/outputs.shape[0]
     return accuracy
 
 
@@ -36,7 +41,12 @@ class SoftmaxTrainer(BaseTrainer):
             loss value (float) on batch
         """
         # TODO: Implement this function (task 3b)
-        loss = 0
+        outputs = self.model.forward(X_batch)
+        self.model.backward(X_batch,outputs,Y_batch)
+        self.model.w = self.model.w - self.model.grad*learning_rate
+        loss = cross_entropy_loss(Y_batch, outputs)
+        return loss
+
         return loss
 
     def validation_step(self):
@@ -121,15 +131,4 @@ if __name__ == "__main__":
         X_train, Y_train, X_val, Y_val,
     )
     train_history_reg01, val_history_reg01 = trainer.train(num_epochs)
-    # You can finish the rest of task 4 below this point.
-
-    # Plotting of softmax weights (Task 4b)
-    #plt.imsave("task4b_softmax_weight.png", weight, cmap="gray")
-
-    # Plotting of accuracy for difference values of lambdas (task 4c)
-    l2_lambdas = [1, .1, .01, .001]
-    plt.savefig("task4c_l2_reg_accuracy.png")
-
-    # Task 4d - Plotting of the l2 norm for each weight
-
-    plt.savefig("task4d_l2_reg_norms.png")
+    # Task 4b-e is in the file task4b.py
